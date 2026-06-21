@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx expo *)",
+      "Bash(npx tsc *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(Start-Sleep -Seconds 25)",
+      "Bash(Invoke-WebRequest -Uri \"http://localhost:8081\" -UseBasicParsing -TimeoutSec 10)",
+      "Bash(Select-Object -ExpandProperty StatusCode)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8081)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/expo/package.json'\\).version\\)\")",
+      "Read(//c/Users/teren/OneDrive - Nanyang Technological University/Desktop/cowork/claude code testing/**)",
+      "Bash(npx create-next-app@latest worldcup-app --typescript --tailwind --eslint --app --src-dir=false --import-alias=\"@/*\" --yes)",
+      "Bash(mkdir \"C:\\\\Users\\\\teren\\\\OneDrive - Nanyang Technological University\\\\Desktop\\\\cowork\\\\claude code testing\\\\worldcup-app\\\\app\\\\api\\\\votes\")",
+      "Bash(mkdir \"C:\\\\Users\\\\teren\\\\OneDrive - Nanyang Technological University\\\\Desktop\\\\cowork\\\\claude code testing\\\\worldcup-app\\\\app\\\\api\\\\fixtures\")",
+      "Bash(mkdir \"C:\\\\Users\\\\teren\\\\OneDrive - Nanyang Technological University\\\\Desktop\\\\cowork\\\\claude code testing\\\\worldcup-app\\\\components\")",
+      "Bash(npm run *)"
+    ]
+  }
+}

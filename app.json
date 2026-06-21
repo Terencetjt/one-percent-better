@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "1% Better",
+    "slug": "one-percent-better",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "onepercentbetter",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": false,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F0EB"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.onepercentbetter.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F5F0EB"
+      },
+      "package": "com.onepercentbetter.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-notifications",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F4F5F0",
+          "resizeMode": "contain"
+        }
+      ],
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
