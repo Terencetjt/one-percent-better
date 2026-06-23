@@ -18,14 +18,17 @@ interface HabitCardProps {
   completed: boolean;
   index: number;
   onToggle: () => void;
+  onLongPress?: () => void;
 }
 
-export function HabitCard({ habit, completed, index, onToggle }: HabitCardProps) {
+export function HabitCard({ habit, completed, index, onToggle, onLongPress }: HabitCardProps) {
   const cardBg = CARD_BG[index % CARD_BG.length];
 
   return (
     <Pressable
       onPress={onToggle}
+      onLongPress={onLongPress}
+      delayLongPress={400}
       accessibilityRole="button"
       accessibilityLabel={`${habit.name}, ${completed ? 'completed' : 'not completed'}`}
       style={({ pressed }) => [styles.card, { backgroundColor: cardBg }, pressed && styles.pressed]}

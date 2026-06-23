@@ -19,7 +19,7 @@ export default function TabsLayout() {
           paddingBottom: Platform.select({ web: 6, default: 26 }),
         },
         tabBarLabelStyle: {
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: '600',
           marginTop: 2,
         },
@@ -35,33 +35,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="partner"
-        options={{
-          title: 'Partner',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="jarvis"
-        options={{
-          title: 'J.A.R.V.I.S.',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="radio-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="habits"
-        options={{
-          title: 'Tracks',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="leaf-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="dashboard"
         options={{
           title: 'Stats',
@@ -70,6 +43,10 @@ export default function TabsLayout() {
           ),
         }}
       />
+      {/* Hidden tabs — keep files for routing but exclude from bar */}
+      <Tabs.Screen name="habits"   options={{ href: null }} />
+      <Tabs.Screen name="partner"  options={{ href: null }} />
+      <Tabs.Screen name="jarvis"   options={{ href: null }} />
     </Tabs>
   );
 }
