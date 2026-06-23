@@ -15,10 +15,25 @@ export interface DailyEntry {
 
 export interface UserProfile {
   name: string;
-  /** "HH:MM" 24-hour format, e.g. "21:00". */
   reminderTime: string;
   reminderEnabled: boolean;
   createdAt: string;
+}
+
+export interface PartnerTask {
+  id: string;
+  name: string;
+  difficulty: number;  // 1–5
+  completed: boolean;
+  pendingReview: boolean;
+  assignedByMe: boolean; // true = I assigned to partner; false = partner assigned to me
+  createdAt: string;
+}
+
+export interface PartnerProfile {
+  myCode: string;
+  partnerName: string | null;
+  coins: number;
 }
 
 export interface AppData {
@@ -26,4 +41,6 @@ export interface AppData {
   entries: Record<string, DailyEntry>;
   favorites: string[];
   userProfile: UserProfile | null;
+  partnerTasks: PartnerTask[];
+  partnerProfile: PartnerProfile | null;
 }

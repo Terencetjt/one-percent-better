@@ -1,7 +1,7 @@
 import React, {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
 } from 'react';
-import { AppData, DailyEntry, Habit, UserProfile } from './types';
+import { AppData, DailyEntry, Habit, PartnerProfile, PartnerTask, UserProfile } from './types';
 import { loadData, saveData } from './storage';
 import { todayISO, uid } from '../lib/date';
 import { scheduleDailyReminder, cancelAllReminders, configureForegroundHandler } from '../lib/notifications';
@@ -12,6 +12,8 @@ interface StoreContextValue {
   entries: Record<string, DailyEntry>;
   favorites: string[];
   userProfile: UserProfile | null;
+  partnerTasks: PartnerTask[];
+  partnerProfile: PartnerProfile | null;
 
   getEntry: (date: string) => DailyEntry;
   toggleHabit: (date: string, habitId: string) => void;
@@ -24,10 +26,19 @@ interface StoreContextValue {
 
   setUserProfile: (profile: UserProfile) => void;
   updateReminderSettings: (enabled: boolean, time: string) => void;
+
+  addPartnerTask: (name: string, difficulty: number, assignedByMe: boolean) => void;
+  completePartnerTask: (id: string) => void;
+  setPendingReview: (id: string, pending: boolean) => void;
+  removePartnerTask: (id: string) => void;
+  setPartnerProfile: (profile: PartnerProfile) => void;
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
-const EMPTY_DATA: AppData = { habits: [], entries: {}, favorites: [], userProfile: null };
+const EMPTY_DATA: AppData = {
+  habits: [], entries: {}, favorites: [], userProfile: null,
+  partnerTasks: [], partnerProfile: null,
+};
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<AppData>(EMPTY_DATA);
@@ -128,23 +139,56 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setData((prev) => {
       if (!prev.userProfile) return prev;
       const userProfile: UserProfile = { ...prev.userProfile, reminderEnabled: enabled, reminderTime: time };
-      if (enabled) {
-        scheduleDailyReminder(userProfile.name, time);
-      } else {
-        cancelAllReminders();
-      }
+      if (enabled) { scheduleDailyReminder(userProfile.name, time); } else { cancelAllReminders(); }
       return { ...prev, userProfile };
     });
   }, []);
 
+  const addPartnerTask = useCallback((name: string, difficulty: number, assignedByMe: boolean) => {
+    setData((prev) => ({
+      ...prev,
+      partnerTasks: [
+        ...prev.partnerTasks,
+        { id: uid(), name: name.trim(), difficulty, completed: false, pendingReview: false, assignedByMe, createdAt: new Date().toISOString() },
+      ],
+    }));
+  }, []);
+
+  const completePartnerTask = useCallback((id: string) => {
+    setData((prev) => ({
+      ...prev,
+      partnerTasks: prev.partnerTasks.map((t) =>
+        t.id === id ? { ...t, completed: !t.completed, pendingReview: false } : t),
+    }));
+  }, []);
+
+  const setPendingReview = useCallback((id: string, pending: boolean) => {
+    setData((prev) => ({
+      ...prev,
+      partnerTasks: prev.partnerTasks.map((t) => t.id === id ? { ...t, pendingReview: pending } : t),
+    }));
+  }, []);
+
+  const removePartnerTask = useCallback((id: string) => {
+    setData((prev) => ({ ...prev, partnerTasks: prev.partnerTasks.filter((t) => t.id !== id) }));
+  }, []);
+
+  const setPartnerProfile = useCallback((profile: PartnerProfile) => {
+    setData((prev) => ({ ...prev, partnerProfile: profile }));
+  }, []);
+
   const value = useMemo<StoreContextValue>(() => ({
-    ready, habits: data.habits, entries: data.entries, favorites: data.favorites, userProfile: data.userProfile,
+    ready, habits: data.habits, entries: data.entries, favorites: data.favorites,
+    userProfile: data.userProfile, partnerTasks: data.partnerTasks, partnerProfile: data.partnerProfile,
     getEntry, toggleHabit, setLearning, addHabit, updateHabit, removeHabit,
     toggleFavorite, isFavorite, setUserProfile, updateReminderSettings,
+    addPartnerTask, completePartnerTask, setPendingReview, removePartnerTask, setPartnerProfile,
   }), [
     ready, data.habits, data.entries, data.favorites, data.userProfile,
+    data.partnerTasks, data.partnerProfile,
     getEntry, toggleHabit, setLearning, addHabit, updateHabit, removeHabit,
     toggleFavorite, isFavorite, setUserProfile, updateReminderSettings,
+    addPartnerTask, completePartnerTask, setPendingReview, removePartnerTask, setPartnerProfile,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
@@ -157,6 +201,6 @@ export function useStore(): StoreContextValue {
 }
 
 export function useAppData(): AppData {
-  const { habits, entries, favorites, userProfile } = useStore();
-  return { habits, entries, favorites, userProfile };
+  const { habits, entries, favorites, userProfile, partnerTasks, partnerProfile } = useStore();
+  return { habits, entries, favorites, userProfile, partnerTasks, partnerProfile };
 }

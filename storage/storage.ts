@@ -22,6 +22,8 @@ function parseLocal(raw: string): AppData {
     entries: parsed.entries ?? {},
     favorites: parsed.favorites ?? [],
     userProfile: parsed.userProfile ?? null,
+    partnerTasks: parsed.partnerTasks ?? [],
+    partnerProfile: parsed.partnerProfile ?? null,
   };
 }
 
@@ -46,7 +48,7 @@ async function loadCloud(deviceId: string): Promise<AppData | null> {
   try {
     const { data, error } = await supabase
       .from('app_data')
-      .select('habits, entries, favorites, user_profile')
+      .select('habits, entries, favorites, user_profile, partner_tasks, partner_profile')
       .eq('device_id', deviceId)
       .single();
 
@@ -57,6 +59,8 @@ async function loadCloud(deviceId: string): Promise<AppData | null> {
       entries: (data.entries as AppData['entries']) ?? {},
       favorites: (data.favorites as AppData['favorites']) ?? [],
       userProfile: (data.user_profile as AppData['userProfile']) ?? null,
+      partnerTasks: (data.partner_tasks as AppData['partnerTasks']) ?? [],
+      partnerProfile: (data.partner_profile as AppData['partnerProfile']) ?? null,
     };
   } catch {
     return null;
@@ -71,6 +75,8 @@ async function saveCloud(deviceId: string, data: AppData): Promise<void> {
       entries: data.entries,
       favorites: data.favorites,
       user_profile: data.userProfile,
+      partner_tasks: data.partnerTasks,
+      partner_profile: data.partnerProfile,
       updated_at: new Date().toISOString(),
     });
   } catch (err) {
@@ -80,30 +86,25 @@ async function saveCloud(deviceId: string, data: AppData): Promise<void> {
 
 export async function loadData(): Promise<AppData> {
   const deviceId = await getDeviceId();
-
-  // Fast path: use local cache if it exists
   const local = await loadLocal();
   if (local) return local;
 
-  // No local data (fresh install / cleared storage) — try to restore from cloud
   const cloud = await loadCloud(deviceId);
   if (cloud) {
     await saveLocal(cloud);
     return cloud;
   }
 
-  // Brand new user — seed and persist
   const seeded = createSeedData();
   await saveLocal(seeded);
-  saveCloud(deviceId, seeded); // fire-and-forget
+  saveCloud(deviceId, seeded);
   return seeded;
 }
 
 export async function saveData(data: AppData): Promise<void> {
   const deviceId = await getDeviceId();
-  // Write locally first (instant), then sync to cloud in background
   await saveLocal(data);
-  saveCloud(deviceId, data); // non-blocking
+  saveCloud(deviceId, data);
 }
 
 export async function clearData(): Promise<void> {
