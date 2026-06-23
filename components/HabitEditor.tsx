@@ -13,6 +13,7 @@ export interface HabitDraft {
   name: string;
   icon: string;
   color: string;
+  owner: 'me' | 'partner';
 }
 
 interface HabitEditorProps {
@@ -27,12 +28,14 @@ export function HabitEditor({ visible, habit, onClose, onSave, onDelete }: Habit
   const [name, setName] = useState('');
   const [icon, setIcon] = useState<string>(HABIT_ICONS[0]);
   const [color, setColor] = useState<string>(habitPalette[0]);
+  const [owner, setOwner] = useState<'me' | 'partner'>('me');
 
   useEffect(() => {
     if (visible) {
       setName(habit?.name ?? '');
       setIcon(habit?.icon ?? HABIT_ICONS[0]);
       setColor(habit?.color ?? habitPalette[0]);
+      setOwner(habit?.owner ?? 'me');
     }
   }, [visible, habit]);
 
@@ -61,6 +64,21 @@ export function HabitEditor({ visible, habit, onClose, onSave, onDelete }: Habit
               </Text>
             </View>
 
+            <Text variant="label" style={styles.fieldLabel}>WHOSE HABIT</Text>
+            <View style={styles.ownerRow}>
+              {(['me', 'partner'] as const).map((o) => (
+                <Pressable
+                  key={o}
+                  onPress={() => setOwner(o)}
+                  style={[styles.ownerBtn, owner === o && { backgroundColor: color, borderColor: color }]}
+                >
+                  <Text style={[styles.ownerText, owner === o && { color: colors.dark, fontWeight: '700' }]}>
+                    {o === 'me' ? 'Mine' : "Partner's"}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
             <Text variant="label" style={styles.fieldLabel}>NAME</Text>
             <TextInput
               value={name}
@@ -70,7 +88,7 @@ export function HabitEditor({ visible, habit, onClose, onSave, onDelete }: Habit
               style={styles.input}
               autoFocus
               returnKeyType="done"
-              onSubmitEditing={() => canSave && onSave({ name: name.trim(), icon, color })}
+              onSubmitEditing={() => canSave && onSave({ name: name.trim(), icon, color, owner })}
             />
 
             <Text variant="label" style={styles.fieldLabel}>ICON</Text>
@@ -113,7 +131,7 @@ export function HabitEditor({ visible, habit, onClose, onSave, onDelete }: Habit
             <View style={styles.actions}>
               <Button
                 label={habit ? 'Save changes' : 'Add track'}
-                onPress={() => canSave && onSave({ name: name.trim(), icon, color })}
+                onPress={() => canSave && onSave({ name: name.trim(), icon, color, owner })}
                 disabled={!canSave}
               />
               <Button label="Cancel" variant="ghost" onPress={onClose} />
@@ -202,4 +220,15 @@ const styles = StyleSheet.create({
   },
   colorActive: { borderWidth: 3, borderColor: colors.dark },
   actions: { marginTop: spacing.lg, gap: spacing.sm },
+  ownerRow: { flexDirection: 'row', gap: spacing.sm },
+  ownerBtn: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    borderRadius: radii.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+  },
+  ownerText: { fontSize: 14, color: colors.textMuted },
 });

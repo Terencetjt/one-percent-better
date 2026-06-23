@@ -38,6 +38,11 @@ export default function TodayScreen() {
 
   const entry = getEntry(selectedDate);
   const isToday = selectedDate === today;
+
+  const myHabits = habits.filter(h => (h.owner ?? 'me') === 'me');
+  const partnerHabits = habits.filter(h => h.owner === 'partner');
+  const partnerName = userProfile ? null : null; // pull from partnerProfile when available
+
   const completedCount = habits.filter(h => entry?.habitCompletions[h.id]).length;
   const allDone = habits.length > 0 && completedCount === habits.length;
 
@@ -96,31 +101,56 @@ export default function TodayScreen() {
           </View>
         )}
 
-        {/* Habits */}
+        {/* My habits */}
         <View style={styles.section}>
           <View style={styles.sectionRow}>
-            <Text style={styles.sectionLabel}>
-              {isToday ? "TODAY'S TRACKS" : formatDisplayDate(selectedDate).toUpperCase()}
-            </Text>
-            {habits.length > 0 && (
-              <Text style={styles.sectionHint}>Hold to edit</Text>
-            )}
+            <Text style={styles.sectionLabel}>MY HABITS</Text>
+            {myHabits.length > 0 && <Text style={styles.sectionHint}>Hold to edit</Text>}
           </View>
-
-          {habits.length === 0 ? (
+          {myHabits.length === 0 ? (
             <Pressable onPress={openAdd} style={styles.emptyCard}>
-              <Ionicons name="add-circle-outline" size={40} color="#C8C8D8" />
+              <Ionicons name="add-circle-outline" size={36} color="#C8C8D8" />
               <Text style={styles.emptyTitle}>Add your first habit</Text>
-              <Text style={styles.emptyBody}>Tap here or the + button to get started.</Text>
+              <Text style={styles.emptyBody}>Tap + to add a habit for yourself.</Text>
             </Pressable>
           ) : (
             <View style={styles.habitList}>
-              {habits.map((habit, idx) => (
+              {myHabits.map((habit, idx) => (
                 <HabitCard
                   key={habit.id}
                   habit={habit}
                   completed={!!entry?.habitCompletions[habit.id]}
                   index={idx}
+                  onToggle={() => toggleHabit(selectedDate, habit.id)}
+                  onLongPress={() => openEdit(habit)}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Partner's habits */}
+        <View style={styles.section}>
+          <View style={styles.sectionRow}>
+            <Text style={[styles.sectionLabel, styles.sectionLabelPartner]}>
+              PARTNER'S HABITS
+            </Text>
+            {partnerHabits.length > 0 && <Text style={styles.sectionHint}>Hold to edit</Text>}
+          </View>
+          {partnerHabits.length === 0 ? (
+            <Pressable onPress={openAdd} style={[styles.emptyCard, styles.emptyCardPartner]}>
+              <Ionicons name="person-add-outline" size={36} color="#A8D8D4" />
+              <Text style={styles.emptyTitle}>Add partner's habit</Text>
+              <Text style={styles.emptyBody}>Tap + and choose "Partner's" to track together.</Text>
+            </Pressable>
+          ) : (
+            <View style={styles.habitList}>
+              {partnerHabits.map((habit, idx) => (
+                <HabitCard
+                  key={habit.id}
+                  habit={habit}
+                  completed={!!entry?.habitCompletions[habit.id]}
+                  index={idx + myHabits.length}
                   onToggle={() => toggleHabit(selectedDate, habit.id)}
                   onLongPress={() => openEdit(habit)}
                 />
@@ -210,11 +240,13 @@ const styles = StyleSheet.create({
   sectionLabel: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, color: '#9A9AB0' },
   sectionHint: { fontSize: 11, color: '#C0C0D0' },
   habitList: { gap: 10 },
+  sectionLabelPartner: { color: '#2EC4C4' },
   emptyCard: {
     backgroundColor: '#FFFFFF', borderRadius: 16, padding: 32,
     alignItems: 'center', gap: 10,
     borderWidth: 2, borderColor: '#EEEEF6', borderStyle: 'dashed',
   },
+  emptyCardPartner: { borderColor: '#C8EEEC' },
   emptyTitle: { fontSize: 16, fontWeight: '600', color: '#1A1A2E' },
   emptyBody: { fontSize: 14, color: '#8A8A9A', textAlign: 'center' },
   learningCard: {

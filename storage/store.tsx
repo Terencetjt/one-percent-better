@@ -18,7 +18,7 @@ interface StoreContextValue {
   getEntry: (date: string) => DailyEntry;
   toggleHabit: (date: string, habitId: string) => void;
   setLearning: (date: string, learning: string) => void;
-  addHabit: (input: { name: string; icon: string; color: string }) => void;
+  addHabit: (input: { name: string; icon: string; color: string; owner: 'me' | 'partner' }) => void;
   updateHabit: (id: string, patch: Partial<Pick<Habit, 'name' | 'icon' | 'color'>>) => void;
   removeHabit: (id: string) => void;
   toggleFavorite: (date: string) => void;
@@ -94,10 +94,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const addHabit = useCallback((input: { name: string; icon: string; color: string }) => {
+  const addHabit = useCallback((input: { name: string; icon: string; color: string; owner: 'me' | 'partner' }) => {
     setData((prev) => ({
       ...prev,
-      habits: [...prev.habits, { id: uid(), name: input.name.trim(), icon: input.icon, color: input.color, createdAt: new Date().toISOString() }],
+      habits: [...prev.habits, { id: uid(), name: input.name.trim(), icon: input.icon, color: input.color, owner: input.owner, createdAt: new Date().toISOString() }],
     }));
   }, []);
 

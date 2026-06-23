@@ -3,6 +3,7 @@ export interface Habit {
   name: string;
   icon: string;
   color: string;
+  owner: 'me' | 'partner'; // whose habit this is
   createdAt: string;
 }
 
