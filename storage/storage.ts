@@ -24,6 +24,7 @@ function parseLocal(raw: string): AppData {
     userProfile: parsed.userProfile ?? null,
     partnerTasks: parsed.partnerTasks ?? [],
     partnerProfile: parsed.partnerProfile ?? null,
+    datePlans: parsed.datePlans ?? {},
   };
 }
 
@@ -48,7 +49,7 @@ async function loadCloud(deviceId: string): Promise<AppData | null> {
   try {
     const { data, error } = await supabase
       .from('app_data')
-      .select('habits, entries, favorites, user_profile, partner_tasks, partner_profile')
+      .select('habits, entries, favorites, user_profile, partner_tasks, partner_profile, date_plans')
       .eq('device_id', deviceId)
       .single();
 
@@ -61,6 +62,7 @@ async function loadCloud(deviceId: string): Promise<AppData | null> {
       userProfile: (data.user_profile as AppData['userProfile']) ?? null,
       partnerTasks: (data.partner_tasks as AppData['partnerTasks']) ?? [],
       partnerProfile: (data.partner_profile as AppData['partnerProfile']) ?? null,
+      datePlans: (data.date_plans as AppData['datePlans']) ?? {},
     };
   } catch {
     return null;
@@ -77,6 +79,7 @@ async function saveCloud(deviceId: string, data: AppData): Promise<void> {
       user_profile: data.userProfile,
       partner_tasks: data.partnerTasks,
       partner_profile: data.partnerProfile,
+      date_plans: data.datePlans,
       updated_at: new Date().toISOString(),
     });
   } catch (err) {

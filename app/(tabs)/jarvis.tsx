@@ -34,7 +34,7 @@ function getJarvisResponse(
   const total = habits.length;
   const remaining = total - done;
   const streak = currentStreak(entries);
-  const rate = completionRate({ habits, entries, favorites: [], userProfile: null, partnerTasks: [], partnerProfile: null }, 7);
+  const rate = completionRate({ habits, entries, favorites: [], userProfile: null, partnerTasks: [], partnerProfile: null, datePlans: {} }, 7);
   const name = userName ? `, ${userName}` : '';
   const msg = input.toLowerCase().trim();
 

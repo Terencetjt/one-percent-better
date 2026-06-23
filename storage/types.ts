@@ -37,6 +37,15 @@ export interface PartnerProfile {
   coins: number;
 }
 
+export interface DatePromise {
+  id: string;
+  date: string;
+  text: string;
+  completed: boolean;
+  owner: 'me' | 'partner';
+  createdAt: string;
+}
+
 export interface AppData {
   habits: Habit[];
   entries: Record<string, DailyEntry>;
@@ -44,4 +53,5 @@ export interface AppData {
   userProfile: UserProfile | null;
   partnerTasks: PartnerTask[];
   partnerProfile: PartnerProfile | null;
+  datePlans: Record<string, DatePromise[]>; // keyed by ISO date
 }

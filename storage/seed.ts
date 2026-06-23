@@ -14,5 +14,6 @@ export function createSeedData(): AppData {
     userProfile: null,
     partnerTasks: [],
     partnerProfile: null,
+    datePlans: {},
   };
 }

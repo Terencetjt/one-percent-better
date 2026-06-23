@@ -1,7 +1,7 @@
 import React, {
   createContext, useCallback, useContext, useEffect, useMemo, useRef, useState,
 } from 'react';
-import { AppData, DailyEntry, Habit, PartnerProfile, PartnerTask, UserProfile } from './types';
+import { AppData, DatePromise, DailyEntry, Habit, PartnerProfile, PartnerTask, UserProfile } from './types';
 import { loadData, saveData } from './storage';
 import { todayISO, uid } from '../lib/date';
 import { scheduleDailyReminder, cancelAllReminders, configureForegroundHandler } from '../lib/notifications';
@@ -24,6 +24,11 @@ interface StoreContextValue {
   toggleFavorite: (date: string) => void;
   isFavorite: (date: string) => boolean;
 
+  datePlans: Record<string, DatePromise[]>;
+  addPromise: (date: string, text: string, owner: 'me' | 'partner') => void;
+  togglePromise: (date: string, id: string) => void;
+  removePromise: (date: string, id: string) => void;
+
   setUserProfile: (profile: UserProfile) => void;
   updateReminderSettings: (enabled: boolean, time: string) => void;
 
@@ -37,7 +42,7 @@ interface StoreContextValue {
 const StoreContext = createContext<StoreContextValue | null>(null);
 const EMPTY_DATA: AppData = {
   habits: [], entries: {}, favorites: [], userProfile: null,
-  partnerTasks: [], partnerProfile: null,
+  partnerTasks: [], partnerProfile: null, datePlans: {},
 };
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -177,18 +182,54 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setData((prev) => ({ ...prev, partnerProfile: profile }));
   }, []);
 
+  const addPromise = useCallback((date: string, text: string, owner: 'me' | 'partner') => {
+    setData((prev) => {
+      const existing = prev.datePlans[date] ?? [];
+      return {
+        ...prev,
+        datePlans: {
+          ...prev.datePlans,
+          [date]: [...existing, { id: uid(), date, text: text.trim(), completed: false, owner, createdAt: new Date().toISOString() }],
+        },
+      };
+    });
+  }, []);
+
+  const togglePromise = useCallback((date: string, id: string) => {
+    setData((prev) => ({
+      ...prev,
+      datePlans: {
+        ...prev.datePlans,
+        [date]: (prev.datePlans[date] ?? []).map((p) => p.id === id ? { ...p, completed: !p.completed } : p),
+      },
+    }));
+  }, []);
+
+  const removePromise = useCallback((date: string, id: string) => {
+    setData((prev) => ({
+      ...prev,
+      datePlans: {
+        ...prev.datePlans,
+        [date]: (prev.datePlans[date] ?? []).filter((p) => p.id !== id),
+      },
+    }));
+  }, []);
+
   const value = useMemo<StoreContextValue>(() => ({
     ready, habits: data.habits, entries: data.entries, favorites: data.favorites,
     userProfile: data.userProfile, partnerTasks: data.partnerTasks, partnerProfile: data.partnerProfile,
+    datePlans: data.datePlans,
     getEntry, toggleHabit, setLearning, addHabit, updateHabit, removeHabit,
     toggleFavorite, isFavorite, setUserProfile, updateReminderSettings,
     addPartnerTask, completePartnerTask, setPendingReview, removePartnerTask, setPartnerProfile,
+    addPromise, togglePromise, removePromise,
   }), [
     ready, data.habits, data.entries, data.favorites, data.userProfile,
-    data.partnerTasks, data.partnerProfile,
+    data.partnerTasks, data.partnerProfile, data.datePlans,
     getEntry, toggleHabit, setLearning, addHabit, updateHabit, removeHabit,
     toggleFavorite, isFavorite, setUserProfile, updateReminderSettings,
     addPartnerTask, completePartnerTask, setPendingReview, removePartnerTask, setPartnerProfile,
+    addPromise, togglePromise, removePromise,
   ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
@@ -201,6 +242,6 @@ export function useStore(): StoreContextValue {
 }
 
 export function useAppData(): AppData {
-  const { habits, entries, favorites, userProfile, partnerTasks, partnerProfile } = useStore();
-  return { habits, entries, favorites, userProfile, partnerTasks, partnerProfile };
+  const { habits, entries, favorites, userProfile, partnerTasks, partnerProfile, datePlans } = useStore();
+  return { habits, entries, favorites, userProfile, partnerTasks, partnerProfile, datePlans };
 }
